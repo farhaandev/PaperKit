@@ -24,7 +24,8 @@ export function ToolCard({
   return (
     <Pressable
       onPress={onPress}
-      className="flex-1 bg-slate-900 border border-slate-800 rounded-2xl p-4 active:scale-[0.98] active:bg-slate-800/80 justify-between min-h-[120px] shadow-sm relative overflow-hidden"
+      style={({ pressed }) => [{ opacity: pressed ? 0.85 : 1 }]}
+      className="flex-1 bg-slate-900 border border-slate-800 rounded-2xl p-4 justify-between min-h-[120px] shadow-sm relative overflow-hidden"
       android_ripple={{ color: 'rgba(255, 255, 255, 0.05)', borderless: false }}
     >
       {/* Decorative top accent indicator line */}

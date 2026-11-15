@@ -28,7 +28,8 @@ export default function ESignScreen(): React.JSX.Element {
 
       <Pressable
         onPress={() => router.back()}
-        className="flex-row items-center gap-2 bg-slate-900 border border-slate-800 px-5 py-3 rounded-xl active:bg-slate-800"
+        style={({ pressed }) => [{ opacity: pressed ? 0.75 : 1 }]}
+        className="flex-row items-center gap-2 bg-slate-900 border border-slate-800 px-5 py-3 rounded-xl"
       >
         <ArrowLeft size={16} color="#94a3b8" />
         <Text className="text-slate-200 text-xs font-semibold">

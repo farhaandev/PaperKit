@@ -264,7 +264,10 @@ export default function CompressScreen(): React.JSX.Element {
       >
         {/* Source Picker (Empty State or Replace button) */}
         {!sourceUri ? (
-          <View className="bg-slate-900 border border-dashed border-slate-800 rounded-2xl p-6 items-center mb-5">
+          <View
+            key="compress-picker-empty"
+            className="bg-slate-900 border border-dashed border-slate-800 rounded-2xl p-6 items-center mb-5"
+          >
             <View className="w-14 h-14 rounded-2xl bg-amber-950/60 border border-amber-600/30 items-center justify-center mb-3.5">
               <Sparkles size={26} color="#fbbf24" />
             </View>
@@ -278,7 +281,8 @@ export default function CompressScreen(): React.JSX.Element {
             <View className="flex-row items-center gap-3 w-full">
               <Pressable
                 onPress={() => void handlePickFromGallery()}
-                className="flex-1 py-3.5 bg-amber-600 rounded-xl flex-row items-center justify-center gap-2 active:opacity-80"
+                style={({ pressed }) => [{ opacity: pressed ? 0.75 : 1 }]}
+                className="flex-1 py-3.5 bg-amber-600 rounded-xl flex-row items-center justify-center gap-2"
               >
                 <ImagePlus size={18} color="#ffffff" />
                 <Text className="text-white font-bold text-xs">Gallery</Text>
@@ -286,7 +290,8 @@ export default function CompressScreen(): React.JSX.Element {
 
               <Pressable
                 onPress={() => void handleTakePhoto()}
-                className="flex-1 py-3.5 bg-slate-800 border border-slate-700/80 rounded-xl flex-row items-center justify-center gap-2 active:opacity-80"
+                style={({ pressed }) => [{ opacity: pressed ? 0.75 : 1 }]}
+                className="flex-1 py-3.5 bg-slate-800 border border-slate-700/80 rounded-xl flex-row items-center justify-center gap-2"
               >
                 <Camera size={18} color="#e2e8f0" />
                 <Text className="text-white font-bold text-xs">Take Photo</Text>
@@ -295,7 +300,10 @@ export default function CompressScreen(): React.JSX.Element {
           </View>
         ) : (
           /* Before / After Comparison Card */
-          <View className="bg-slate-900 border border-slate-800 rounded-2xl p-4 mb-5 shadow-sm">
+          <View
+            key="compress-preview-card"
+            className="bg-slate-900 border border-slate-800 rounded-2xl p-4 mb-5 shadow-sm"
+          >
             <View className="flex-row items-center justify-between mb-3 pb-2.5 border-b border-slate-800/80">
               <Text className="text-slate-400 text-[11px] font-medium uppercase tracking-wider">
                 Compression Preview
@@ -303,7 +311,8 @@ export default function CompressScreen(): React.JSX.Element {
               <Pressable
                 onPress={() => void handlePickFromGallery()}
                 hitSlop={8}
-                className="flex-row items-center gap-1 active:opacity-70"
+                style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+                className="flex-row items-center gap-1"
               >
                 <RefreshCw size={12} color="#fbbf24" />
                 <Text className="text-amber-400 text-xs font-semibold">Change Image</Text>
@@ -377,6 +386,7 @@ export default function CompressScreen(): React.JSX.Element {
             <View className="bg-slate-900 border border-slate-800 rounded-2xl p-1 flex-row mb-4">
               <Pressable
                 onPress={() => setActiveTab('target')}
+                style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
                 className={`flex-1 py-2.5 rounded-xl flex-row items-center justify-center gap-1.5 ${
                   activeTab === 'target' ? 'bg-amber-600 shadow-sm' : 'bg-transparent'
                 }`}
@@ -396,6 +406,7 @@ export default function CompressScreen(): React.JSX.Element {
 
               <Pressable
                 onPress={() => setActiveTab('manual')}
+                style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
                 className={`flex-1 py-2.5 rounded-xl flex-row items-center justify-center gap-1.5 ${
                   activeTab === 'manual' ? 'bg-amber-600 shadow-sm' : 'bg-transparent'
                 }`}
@@ -416,7 +427,7 @@ export default function CompressScreen(): React.JSX.Element {
 
             {/* Tab 1: Target Size Mode */}
             {activeTab === 'target' ? (
-              <View className="bg-slate-900 border border-slate-800 rounded-2xl p-4 mb-4">
+              <View key="tab-target-panel" className="bg-slate-900 border border-slate-800 rounded-2xl p-4 mb-4">
                 <View className="flex-row items-center justify-between mb-2">
                   <Text className="text-slate-400 text-xs font-medium">
                     Target Max File Size
@@ -434,7 +445,8 @@ export default function CompressScreen(): React.JSX.Element {
                       <Pressable
                         key={preset}
                         onPress={() => handleSelectTargetPreset(preset)}
-                        className={`flex-1 py-2 rounded-xl items-center border active:opacity-80 ${
+                        style={({ pressed }) => [{ opacity: pressed ? 0.75 : 1 }]}
+                        className={`flex-1 py-2 rounded-xl items-center border ${
                           isSelected
                             ? 'bg-amber-950/80 border-amber-500'
                             : 'bg-slate-950 border-slate-800'
@@ -477,7 +489,7 @@ export default function CompressScreen(): React.JSX.Element {
               </View>
             ) : (
               /* Tab 2: Manual Quality Mode */
-              <View className="bg-slate-900 border border-slate-800 rounded-2xl p-4 mb-4">
+              <View key="tab-manual-panel" className="bg-slate-900 border border-slate-800 rounded-2xl p-4 mb-4">
                 {/* Quality Presets */}
                 <Text className="text-slate-400 text-xs font-medium mb-2">
                   JPEG Quality
@@ -489,7 +501,8 @@ export default function CompressScreen(): React.JSX.Element {
                       <Pressable
                         key={q.value}
                         onPress={() => setManualQuality(q.value)}
-                        className={`flex-1 py-2 rounded-xl items-center border active:opacity-80 ${
+                        style={({ pressed }) => [{ opacity: pressed ? 0.75 : 1 }]}
+                        className={`flex-1 py-2 rounded-xl items-center border ${
                           isSelected
                             ? 'bg-amber-950/80 border-amber-500'
                             : 'bg-slate-950 border-slate-800'
@@ -518,7 +531,8 @@ export default function CompressScreen(): React.JSX.Element {
                       <Pressable
                         key={res.label}
                         onPress={() => setMaxWidth(res.value)}
-                        className={`flex-1 py-2 rounded-xl items-center border active:opacity-80 ${
+                        style={({ pressed }) => [{ opacity: pressed ? 0.75 : 1 }]}
+                        className={`flex-1 py-2 rounded-xl items-center border ${
                           isSelected
                             ? 'bg-amber-950/80 border-amber-500'
                             : 'bg-slate-950 border-slate-800'
@@ -563,7 +577,8 @@ export default function CompressScreen(): React.JSX.Element {
               <View className="flex-row items-center gap-2">
                 <Pressable
                   onPress={() => setOutputFormat('jpg')}
-                  className={`flex-1 py-2.5 rounded-xl items-center border flex-row justify-center gap-1.5 active:opacity-80 ${
+                  style={({ pressed }) => [{ opacity: pressed ? 0.75 : 1 }]}
+                  className={`flex-1 py-2.5 rounded-xl items-center border flex-row justify-center gap-1.5 ${
                     outputFormat === 'jpg'
                       ? 'bg-amber-950/80 border-amber-500'
                       : 'bg-slate-950 border-slate-800'
@@ -581,7 +596,8 @@ export default function CompressScreen(): React.JSX.Element {
 
                 <Pressable
                   onPress={() => setOutputFormat('pdf')}
-                  className={`flex-1 py-2.5 rounded-xl items-center border flex-row justify-center gap-1.5 active:opacity-80 ${
+                  style={({ pressed }) => [{ opacity: pressed ? 0.75 : 1 }]}
+                  className={`flex-1 py-2.5 rounded-xl items-center border flex-row justify-center gap-1.5 ${
                     outputFormat === 'pdf'
                       ? 'bg-rose-950/80 border-rose-500'
                       : 'bg-slate-950 border-slate-800'
@@ -615,9 +631,19 @@ export default function CompressScreen(): React.JSX.Element {
         <Pressable
           onPress={() => void handleSave()}
           disabled={!sourceUri || !compressedResult || isCompressing || isSaving}
-          className={`w-full py-4 rounded-xl flex-row items-center justify-center gap-2 min-h-[50px] shadow-lg active:opacity-85 ${
+          style={({ pressed }) => [
+            {
+              opacity:
+                !sourceUri || !compressedResult || isCompressing || isSaving
+                  ? 0.5
+                  : pressed
+                  ? 0.85
+                  : 1,
+            },
+          ]}
+          className={`w-full py-4 rounded-xl flex-row items-center justify-center gap-2 min-h-[50px] shadow-lg ${
             !sourceUri || !compressedResult || isCompressing || isSaving
-              ? 'bg-slate-800 opacity-60'
+              ? 'bg-slate-800'
               : 'bg-amber-600 shadow-amber-950/60'
           }`}
         >

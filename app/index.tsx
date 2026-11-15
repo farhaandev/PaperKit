@@ -194,7 +194,8 @@ export default function HomeScreen(): React.JSX.Element {
               <Pressable
                 onPress={() => setSearchQuery('')}
                 hitSlop={8}
-                className="p-1 rounded-full active:bg-slate-800"
+                style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+                className="p-1 rounded-full"
               >
                 <X size={14} color="#94a3b8" />
               </Pressable>

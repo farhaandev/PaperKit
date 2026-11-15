@@ -399,7 +399,8 @@ export default function ExportSuccessScreen(): React.JSX.Element {
                     setEditingTitle(true);
                   }}
                   hitSlop={8}
-                  className="flex-row items-center gap-1 active:opacity-70"
+                  style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+                  className="flex-row items-center gap-1"
                 >
                   <Edit3 size={12} color="#38bdf8" />
                   <Text className="text-sky-400 text-xs font-semibold">
@@ -411,7 +412,8 @@ export default function ExportSuccessScreen(): React.JSX.Element {
                   onPress={() => void handleSaveTitle()}
                   disabled={isSavingName}
                   hitSlop={8}
-                  className="flex-row items-center gap-1 active:opacity-70"
+                  style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+                  className="flex-row items-center gap-1"
                 >
                   {isSavingName ? (
                     <ActivityIndicator size="small" color="#38bdf8" />
@@ -477,7 +479,8 @@ export default function ExportSuccessScreen(): React.JSX.Element {
           <Pressable
             onPress={() => void handleDownload()}
             disabled={isDownloading}
-            className={`w-full py-4 rounded-xl flex-row items-center justify-center gap-2 min-h-[50px] shadow-lg active:opacity-85 ${
+            style={({ pressed }) => [{ opacity: pressed ? 0.85 : 1 }]}
+            className={`w-full py-4 rounded-xl flex-row items-center justify-center gap-2 min-h-[50px] shadow-lg ${
               hasDownloaded
                 ? 'bg-emerald-950/80 border border-emerald-500/50 shadow-emerald-950/40'
                 : 'bg-emerald-600 shadow-emerald-950/60'
@@ -506,7 +509,8 @@ export default function ExportSuccessScreen(): React.JSX.Element {
           <Pressable
             onPress={() => void handleShare()}
             disabled={isSharing}
-            className="w-full py-3.5 rounded-xl flex-row items-center justify-center gap-2 bg-sky-600 active:opacity-85 min-h-[48px] shadow-md shadow-sky-950/50"
+            style={({ pressed }) => [{ opacity: pressed ? 0.85 : 1 }]}
+            className="w-full py-3.5 rounded-xl flex-row items-center justify-center gap-2 bg-sky-600 min-h-[48px] shadow-md shadow-sky-950/50"
           >
             {isSharing ? (
               <ActivityIndicator size="small" color="#ffffff" />
@@ -523,7 +527,8 @@ export default function ExportSuccessScreen(): React.JSX.Element {
           {/* Done / Back to Home (Tertiary Action) */}
           <Pressable
             onPress={() => router.replace('/')}
-            className="w-full py-3.5 rounded-xl flex-row items-center justify-center gap-2 bg-slate-900 border border-slate-800 active:bg-slate-800 min-h-[48px] mt-1"
+            style={({ pressed }) => [{ opacity: pressed ? 0.85 : 1 }]}
+            className="w-full py-3.5 rounded-xl flex-row items-center justify-center gap-2 bg-slate-900 border border-slate-800 min-h-[48px] mt-1"
           >
             <Home size={17} color="#94a3b8" />
             <Text className="text-slate-300 font-medium text-xs">

@@ -151,7 +151,8 @@ export function RecentFileItem({
   return (
     <Pressable
       onPress={onPress ?? handleShare}
-      className="bg-slate-900 border border-slate-800 rounded-xl p-3 flex-row items-center justify-between active:bg-slate-800/80 active:scale-[0.99] mb-2.5"
+      style={({ pressed }) => [{ opacity: pressed ? 0.85 : 1 }]}
+      className="bg-slate-900 border border-slate-800 rounded-xl p-3 flex-row items-center justify-between mb-2.5"
     >
       {/* Icon Badge */}
       <View
@@ -190,7 +191,8 @@ export function RecentFileItem({
           disabled={isSharing || isDeleting}
           hitSlop={6}
           accessibilityLabel="Share file"
-          className="w-10 h-10 rounded-lg items-center justify-center active:bg-slate-800 min-h-[44px] min-w-[44px]"
+          style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+          className="w-10 h-10 rounded-lg items-center justify-center min-h-[44px] min-w-[44px]"
         >
           {isSharing ? (
             <ActivityIndicator size="small" color="#38bdf8" />
@@ -204,7 +206,8 @@ export function RecentFileItem({
           disabled={isSharing || isDeleting}
           hitSlop={6}
           accessibilityLabel="Delete file"
-          className="w-10 h-10 rounded-lg items-center justify-center active:bg-slate-800 min-h-[44px] min-w-[44px]"
+          style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+          className="w-10 h-10 rounded-lg items-center justify-center min-h-[44px] min-w-[44px]"
         >
           {isDeleting ? (
             <ActivityIndicator size="small" color="#f87171" />

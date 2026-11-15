@@ -200,7 +200,8 @@ export default function ImagesToPdfScreen(): React.JSX.Element {
           <Pressable
             onPress={() => void handlePickGallery()}
             disabled={isGenerating}
-            className="flex-1 flex-row items-center justify-center gap-2 bg-indigo-600 active:opacity-85 py-3.5 px-4 rounded-xl min-h-[44px] shadow-sm"
+            style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
+            className="flex-1 flex-row items-center justify-center gap-2 bg-indigo-600 py-3.5 px-4 rounded-xl min-h-[44px] shadow-sm"
           >
             <ImagePlus size={18} color="#ffffff" />
             <Text className="text-white text-xs font-semibold">
@@ -211,7 +212,8 @@ export default function ImagesToPdfScreen(): React.JSX.Element {
           <Pressable
             onPress={() => void handleTakePhoto()}
             disabled={isGenerating}
-            className="flex-1 flex-row items-center justify-center gap-2 bg-slate-900 border border-slate-800 active:bg-slate-800 py-3.5 px-4 rounded-xl min-h-[44px]"
+            style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
+            className="flex-1 flex-row items-center justify-center gap-2 bg-slate-900 border border-slate-800 py-3.5 px-4 rounded-xl min-h-[44px]"
           >
             <Camera size={18} color="#818cf8" />
             <Text className="text-slate-200 text-xs font-semibold">
@@ -252,7 +254,8 @@ export default function ImagesToPdfScreen(): React.JSX.Element {
             <View className="flex-row bg-slate-950 p-1 rounded-xl border border-slate-800">
               <Pressable
                 onPress={() => setPageSize('A4')}
-                className={`flex-1 py-2 rounded-lg items-center justify-center flex-row gap-1.5 active:opacity-80 ${
+                style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
+                className={`flex-1 py-2 rounded-lg items-center justify-center flex-row gap-1.5 ${
                   pageSize === 'A4'
                     ? 'bg-indigo-600 shadow-sm'
                     : 'bg-transparent'
@@ -270,7 +273,8 @@ export default function ImagesToPdfScreen(): React.JSX.Element {
 
               <Pressable
                 onPress={() => setPageSize('fit')}
-                className={`flex-1 py-2 rounded-lg items-center justify-center flex-row gap-1.5 active:opacity-80 ${
+                style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
+                className={`flex-1 py-2 rounded-lg items-center justify-center flex-row gap-1.5 ${
                   pageSize === 'fit'
                     ? 'bg-indigo-600 shadow-sm'
                     : 'bg-transparent'
@@ -298,7 +302,7 @@ export default function ImagesToPdfScreen(): React.JSX.Element {
             <Pressable
               onPress={() => setPages([])}
               hitSlop={8}
-              className="active:opacity-70"
+              style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
             >
               <Text className="text-rose-400 text-xs font-medium">Clear All</Text>
             </Pressable>
@@ -363,9 +367,8 @@ export default function ImagesToPdfScreen(): React.JSX.Element {
                       disabled={isFirst}
                       hitSlop={6}
                       accessibilityLabel="Move page up"
-                      className={`w-9 h-9 rounded-lg items-center justify-center min-w-[36px] min-h-[36px] bg-slate-950/60 border border-slate-800 active:bg-slate-800 ${
-                        isFirst ? 'opacity-30' : 'opacity-100'
-                      }`}
+                      style={({ pressed }) => [{ opacity: isFirst ? 0.3 : pressed ? 0.7 : 1 }]}
+                      className="w-9 h-9 rounded-lg items-center justify-center min-w-[36px] min-h-[36px] bg-slate-950/60 border border-slate-800"
                     >
                       <ArrowUp size={15} color="#94a3b8" />
                     </Pressable>
@@ -376,9 +379,8 @@ export default function ImagesToPdfScreen(): React.JSX.Element {
                       disabled={isLast}
                       hitSlop={6}
                       accessibilityLabel="Move page down"
-                      className={`w-9 h-9 rounded-lg items-center justify-center min-w-[36px] min-h-[36px] bg-slate-950/60 border border-slate-800 active:bg-slate-800 ${
-                        isLast ? 'opacity-30' : 'opacity-100'
-                      }`}
+                      style={({ pressed }) => [{ opacity: isLast ? 0.3 : pressed ? 0.7 : 1 }]}
+                      className="w-9 h-9 rounded-lg items-center justify-center min-w-[36px] min-h-[36px] bg-slate-950/60 border border-slate-800"
                     >
                       <ArrowDown size={15} color="#94a3b8" />
                     </Pressable>
@@ -389,7 +391,8 @@ export default function ImagesToPdfScreen(): React.JSX.Element {
                       disabled={isRotating}
                       hitSlop={6}
                       accessibilityLabel="Rotate page 90 degrees"
-                      className="w-9 h-9 rounded-lg items-center justify-center bg-slate-950/60 border border-slate-800 active:bg-slate-800 min-w-[36px] min-h-[36px]"
+                      style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+                      className="w-9 h-9 rounded-lg items-center justify-center bg-slate-950/60 border border-slate-800 min-w-[36px] min-h-[36px]"
                     >
                       {isRotating ? (
                         <ActivityIndicator size="small" color="#818cf8" />
@@ -403,7 +406,8 @@ export default function ImagesToPdfScreen(): React.JSX.Element {
                       onPress={() => handleRemove(item.id)}
                       hitSlop={6}
                       accessibilityLabel="Remove page"
-                      className="w-9 h-9 rounded-lg items-center justify-center bg-rose-950/30 border border-rose-900/40 active:bg-rose-950/70 min-w-[36px] min-h-[36px]"
+                      style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}
+                      className="w-9 h-9 rounded-lg items-center justify-center bg-rose-950/30 border border-rose-900/40 min-w-[36px] min-h-[36px]"
                     >
                       <X size={15} color="#f87171" />
                     </Pressable>
@@ -423,11 +427,12 @@ export default function ImagesToPdfScreen(): React.JSX.Element {
         <Pressable
           onPress={() => void handleGenerate()}
           disabled={pages.length === 0 || isGenerating}
-          className={`w-full py-4 rounded-xl flex-row items-center justify-center gap-2 min-h-[50px] bg-indigo-600 active:opacity-85 shadow-lg shadow-indigo-950/60 ${
-            pages.length === 0 || isGenerating
-              ? 'opacity-50'
-              : 'opacity-100'
-          }`}
+          style={({ pressed }) => [
+            {
+              opacity: pages.length === 0 || isGenerating ? 0.5 : pressed ? 0.85 : 1,
+            },
+          ]}
+          className="w-full py-4 rounded-xl flex-row items-center justify-center gap-2 min-h-[50px] bg-indigo-600 shadow-lg shadow-indigo-950/60"
         >
           <Sparkles size={18} color={pages.length === 0 ? '#6366f1' : '#ffffff'} />
           <Text
