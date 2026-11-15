@@ -43,10 +43,59 @@ export default function RootLayout(): React.JSX.Element {
       <StatusBar style="light" />
       <Stack
         screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: '#020617' },
+          headerStyle: {
+            backgroundColor: '#0f172a',
+          },
+          headerTintColor: '#f8fafc',
+          headerTitleStyle: {
+            fontWeight: '600',
+            fontSize: 18,
+          },
+          headerShadowVisible: false,
+          contentStyle: {
+            backgroundColor: '#020617',
+          },
+          animation: 'fade_from_bottom',
         }}
-      />
+      >
+        <Stack.Screen
+          name="index"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="tools/images-to-pdf"
+          options={{
+            title: 'Images to PDF',
+          }}
+        />
+        <Stack.Screen
+          name="tools/merge-pdf"
+          options={{
+            title: 'Merge PDFs',
+          }}
+        />
+        <Stack.Screen
+          name="tools/compress"
+          options={{
+            title: 'Compress File',
+          }}
+        />
+        <Stack.Screen
+          name="tools/e-sign"
+          options={{
+            title: 'E-Sign Document',
+          }}
+        />
+        <Stack.Screen
+          name="export-success"
+          options={{
+            title: 'File Ready',
+            presentation: 'card',
+          }}
+        />
+      </Stack>
     </SafeAreaProvider>
   );
 }
