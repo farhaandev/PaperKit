@@ -175,6 +175,7 @@ export default function ExportSuccessScreen(): React.JSX.Element {
     file_uri?: string;
     size_bytes?: string;
     tool_type?: string;
+    mime_type?: string;
   }>();
 
   const fileId = params.id ? parseInt(params.id, 10) : 0;
@@ -183,7 +184,15 @@ export default function ExportSuccessScreen(): React.JSX.Element {
   const sizeBytes = params.size_bytes ? parseInt(params.size_bytes, 10) : 0;
   const toolType = params.tool_type || 'images-to-pdf';
 
+  const initialIsImage =
+    params.mime_type === 'image/jpeg' ||
+    params.title?.toLowerCase().endsWith('.jpg') ||
+    params.title?.toLowerCase().endsWith('.jpeg');
+
   const [title, setTitle] = useState<string>(initialTitle);
+  const [mimeType, setMimeType] = useState<string>(
+    params.mime_type || (initialIsImage ? 'image/jpeg' : 'application/pdf')
+  );
   const [resolvedUri, setResolvedUri] = useState<string>(fileUri);
   const [editingTitle, setEditingTitle] = useState<boolean>(false);
   const [tempTitle, setTempTitle] = useState<string>(initialTitle);
@@ -192,6 +201,7 @@ export default function ExportSuccessScreen(): React.JSX.Element {
   const [hasDownloaded, setHasDownloaded] = useState<boolean>(false);
   const [isSavingName, setIsSavingName] = useState<boolean>(false);
 
+  const isImage = mimeType === 'image/jpeg' || title.toLowerCase().endsWith('.jpg') || title.toLowerCase().endsWith('.jpeg');
   const toolDisplay = getToolDisplay(toolType);
 
   // Automatically resolve true local URI on mount
@@ -201,8 +211,9 @@ export default function ExportSuccessScreen(): React.JSX.Element {
       setResolvedUri(valid);
       if (fileId > 0) {
         const record = await getRecentFileById(fileId);
-        if (record?.title) {
-          setTitle(record.title);
+        if (record) {
+          if (record.title) setTitle(record.title);
+          if (record.mime_type) setMimeType(record.mime_type);
         }
       }
     })();
@@ -214,7 +225,9 @@ export default function ExportSuccessScreen(): React.JSX.Element {
       Alert.alert('Invalid Name', 'Filename cannot be blank.');
       return;
     }
-    const finalName = trimmed.toLowerCase().endsWith('.pdf') ? trimmed : `${trimmed}.pdf`;
+    const extension = isImage ? '.jpg' : '.pdf';
+    const cleanBase = trimmed.replace(/\.(pdf|jpg|jpeg|png)$/i, '');
+    const finalName = `${cleanBase}${extension}`;
 
     setIsSavingName(true);
     try {
@@ -237,6 +250,7 @@ export default function ExportSuccessScreen(): React.JSX.Element {
     setIsDownloading(true);
     try {
       const targetUri = await resolveValidFileUri(resolvedUri || fileUri, fileId);
+      const destinationMime = isImage ? 'image/jpeg' : 'application/pdf';
 
       if (Platform.OS === 'android') {
         // Read the local file as base64
@@ -252,13 +266,13 @@ export default function ExportSuccessScreen(): React.JSX.Element {
         }
 
         // Clean name without extension for createFileAsync
-        const cleanName = title.replace(/\.pdf$/i, '');
+        const cleanName = title.replace(/\.(pdf|jpg|jpeg|png)$/i, '');
 
         // Create the file in the user-selected folder
         const destinationUri = await FileSystem.StorageAccessFramework.createFileAsync(
           permissions.directoryUri,
           cleanName,
-          'application/pdf'
+          destinationMime
         );
 
         // Write the base64 content into the destination file
@@ -275,8 +289,8 @@ export default function ExportSuccessScreen(): React.JSX.Element {
       } else {
         // iOS fallback: native Share sheet with "Save to Files"
         await Sharing.shareAsync(targetUri, {
-          UTI: 'com.adobe.pdf',
-          mimeType: 'application/pdf',
+          UTI: isImage ? 'public.jpeg' : 'com.adobe.pdf',
+          mimeType: destinationMime,
           dialogTitle: `Save ${title}`,
         });
         setHasDownloaded(true);
@@ -304,10 +318,11 @@ export default function ExportSuccessScreen(): React.JSX.Element {
         return;
       }
 
+      const shareMime = isImage ? 'image/jpeg' : 'application/pdf';
       await Sharing.shareAsync(targetUri, {
-        mimeType: 'application/pdf',
+        mimeType: shareMime,
         dialogTitle: `Share ${title}`,
-        UTI: 'com.adobe.pdf',
+        UTI: isImage ? 'public.jpeg' : 'com.adobe.pdf',
       });
     } catch (error) {
       console.warn('[ExportSuccess] Sharing failed:', error);
@@ -341,14 +356,32 @@ export default function ExportSuccessScreen(): React.JSX.Element {
           Saved locally and encrypted in private app storage.
         </Text>
 
-        {/* Tool Type Badge */}
-        <View
-          className={`flex-row items-center gap-1.5 px-3 py-1 rounded-full border mt-3 mb-5 ${toolDisplay.badgeBg} ${toolDisplay.badgeBorder}`}
-        >
-          <Sparkles size={12} color="#38bdf8" />
-          <Text className={`text-xs font-semibold ${toolDisplay.textColor}`}>
-            {toolDisplay.label}
-          </Text>
+        {/* Badges: Tool Type & Format */}
+        <View className="flex-row items-center gap-2 mt-3 mb-5">
+          <View
+            className={`flex-row items-center gap-1.5 px-3 py-1 rounded-full border ${toolDisplay.badgeBg} ${toolDisplay.badgeBorder}`}
+          >
+            <Sparkles size={12} color="#38bdf8" />
+            <Text className={`text-xs font-semibold ${toolDisplay.textColor}`}>
+              {toolDisplay.label}
+            </Text>
+          </View>
+
+          <View
+            className={`px-2.5 py-1 rounded-full border ${
+              isImage
+                ? 'bg-amber-950/60 border-amber-600/30'
+                : 'bg-rose-950/60 border-rose-600/30'
+            }`}
+          >
+            <Text
+              className={`text-xs font-bold ${
+                isImage ? 'text-amber-400' : 'text-rose-400'
+              }`}
+            >
+              {isImage ? 'JPG Image' : 'PDF Document'}
+            </Text>
+          </View>
         </View>
 
         {/* File Details Card */}
@@ -419,14 +452,21 @@ export default function ExportSuccessScreen(): React.JSX.Element {
             )}
           </View>
 
-          {/* Size & Format row */}
-          <View className="flex-row items-center justify-between">
+          {/* Size & Format rows */}
+          <View className="flex-row items-center justify-between mb-2">
             <View className="flex-row items-center gap-2">
               <HardDrive size={15} color="#94a3b8" />
               <Text className="text-slate-400 text-xs">File Size</Text>
             </View>
             <Text className="text-white text-xs font-bold font-mono">
               {formatBytes(sizeBytes)}
+            </Text>
+          </View>
+
+          <View className="flex-row items-center justify-between pt-2 border-t border-slate-800/80">
+            <Text className="text-slate-400 text-xs">File Format</Text>
+            <Text className="text-slate-200 text-xs font-semibold">
+              {isImage ? 'JPEG Image (.jpg)' : 'PDF Document (.pdf)'}
             </Text>
           </View>
         </View>

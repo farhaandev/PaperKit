@@ -4,3 +4,4 @@
 
 export * from './fileManager';
 export * from './pdfEngine';
+export * from './compressEngine';
