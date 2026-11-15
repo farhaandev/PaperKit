@@ -92,6 +92,17 @@ export async function getRecentFilesCount(): Promise<number> {
 }
 
 /**
+ * Retrieves a single recent file record by its database ID.
+ */
+export async function getRecentFileById(id: number): Promise<RecentFile | null> {
+  const db = await getDatabase();
+  return await db.getFirstAsync<RecentFile>(
+    `SELECT * FROM recent_files WHERE id = ?`,
+    [id]
+  );
+}
+
+/**
  * Updates the title of an existing recent file.
  */
 export async function renameRecentFile(

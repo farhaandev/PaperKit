@@ -25,6 +25,7 @@
     "expo-web-browser": "~58.0.8",
     "lucide-react-native": "^1.72.0",
     "nativewind": "^4.2.7",
+    "pdf-lib": "^1.17.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-native": "0.88.1",
@@ -45,6 +46,7 @@
   },
   "scripts": {
     "start": "expo start",
+    "dev": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo start --android",
     "ios": "expo start --ios",
