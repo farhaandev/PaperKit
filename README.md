@@ -13,8 +13,8 @@ PaperKit is a mobile document utility designed to process documents entirely on-
 - [x] **Step 3:** Navigation Shell + Home Screen UI
 - [x] **Step 4:** Tool 1 (Images → PDF) + Export Success/Share Screen
 - [x] **Step 5:** Tool 2 (Compress Image to Target KB)
-- [ ] **Step 6:** Tool 3 (Merge PDFs) *(Current)*
-- [ ] **Step 7:** Tool 4 (E-Sign Document)
+- [x] **Step 6:** Tool 3 (Merge PDFs)
+- [ ] **Step 7:** Tool 4 (E-Sign Document) *(Current)*
 - [ ] **Step 8:** Polish, Loading States & Edge-Case Handling
 
 ---
@@ -44,8 +44,11 @@ PaperKit is a mobile document utility designed to process documents entirely on-
   - **Save as JPG:** Saves compressed `.jpg` directly to app exports.
   - **Save as PDF:** Wraps the exact compressed JPEG into a single-page PDF with `pdf-lib` in one tap (ideal for job and admission portals requiring compressed PDFs).
 
-### 3. 📑 Merge PDFs (`/tools/merge-pdf`) *(In Progress)*
-- Select multiple existing PDFs and merge them into a single organized document.
+### 3. 📑 Merge PDFs (`/tools/merge-pdf`)
+- Select multiple existing PDFs using `expo-document-picker` with multi-file append support.
+- Automatic metadata inspection (`inspectPdfMetadata`) with password/encryption validation (`isEncrypted`) and corrupted file filtering.
+- Visual ordered queue with sequence badges (`#1`, `#2`, ...), page counts, formatted sizes, running total stats bar, and reordering controls (**Move Up / Move Down / Remove**).
+- One-tap sequential merging via `pdf-lib` without cloud services.
 
 ### 4. ✍️ E-Sign PDF (`/tools/e-sign`) *(Upcoming)*
 - Touch signature pad to create, save, and stamp transparent signatures onto document pages.

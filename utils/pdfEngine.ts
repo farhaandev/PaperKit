@@ -1,4 +1,4 @@
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, EncryptedPDFError } from 'pdf-lib';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import * as FileSystem from 'expo-file-system/legacy';
 import { RecentFile } from '@/constants/types';
@@ -17,8 +17,111 @@ export interface BuildPdfFromImagesOptions {
   outputTitle: string;
 }
 
+export interface PdfMetadata {
+  pageCount: number;
+  isEncrypted: boolean;
+}
+
+export interface MergePdfOptions {
+  pdfUris: string[];
+  outputTitle: string;
+}
+
 const A4_WIDTH = 595.28;
 const A4_HEIGHT = 841.89;
+
+/**
+ * Inspects a PDF file's metadata (page count and encryption status)
+ * without modifying it. Gracefully catches password/encryption errors.
+ */
+export async function inspectPdfMetadata(uri: string): Promise<PdfMetadata> {
+  try {
+    const base64 = await FileSystem.readAsStringAsync(uri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+
+    const doc = await PDFDocument.load(base64, { ignoreEncryption: false });
+    return {
+      pageCount: doc.getPageCount(),
+      isEncrypted: false,
+    };
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    if (
+      error instanceof EncryptedPDFError ||
+      errorMessage.toLowerCase().includes('encrypted') ||
+      errorMessage.toLowerCase().includes('password')
+    ) {
+      return {
+        pageCount: 0,
+        isEncrypted: true,
+      };
+    }
+    throw error;
+  }
+}
+
+/**
+ * Merges multiple PDF documents into a single document in exact sequence order.
+ * Saves the merged PDF directly into EXPORTS_DIRECTORY, records in SQLite,
+ * increments the export counter, and returns the created RecentFile.
+ */
+export async function mergePdfDocuments(
+  options: MergePdfOptions
+): Promise<RecentFile> {
+  const { pdfUris, outputTitle } = options;
+
+  if (!pdfUris || pdfUris.length < 2) {
+    throw new Error('At least two PDF files are required to merge.');
+  }
+
+  // 1. Create a master PDF document
+  const mergedPdf = await PDFDocument.create();
+
+  // 2. Loop through each PDF in exact order
+  for (const uri of pdfUris) {
+    const base64 = await FileSystem.readAsStringAsync(uri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    const srcDoc = await PDFDocument.load(base64, { ignoreEncryption: false });
+    const copiedPages = await mergedPdf.copyPages(srcDoc, srcDoc.getPageIndices());
+    for (const page of copiedPages) {
+      mergedPdf.addPage(page);
+    }
+  }
+
+  // 3. Serialize merged document to base64
+  const pdfBase64 = await mergedPdf.saveAsBase64({ dataUri: false });
+
+  // 4. Save directly into EXPORTS_DIRECTORY
+  await ensureDirectoriesExist();
+  const safeFilename = generateSafeFilename(outputTitle || 'merged', 'pdf');
+  const fileUri = `${EXPORTS_DIRECTORY}${safeFilename}`;
+
+  await FileSystem.writeAsStringAsync(fileUri, pdfBase64, {
+    encoding: FileSystem.EncodingType.Base64,
+  });
+
+  const sizeBytes = await getFileSizeBytes(fileUri);
+
+  // 5. Store record in SQLite database
+  const title = outputTitle.trim().length > 0 ? outputTitle.trim() : 'Merged Document';
+  const displayTitle = title.toLowerCase().endsWith('.pdf') ? title : `${title}.pdf`;
+
+  const recentFile = await addRecentFile({
+    title: displayTitle,
+    file_uri: fileUri,
+    mime_type: 'application/pdf',
+    size_bytes: sizeBytes,
+    tool_type: 'merge-pdf',
+    created_at: Date.now(),
+  });
+
+  // 6. Increment global export counter
+  await incrementExportCounter();
+
+  return recentFile;
+}
 
 /**
  * Builds a multi-page PDF document from an array of image URIs.
