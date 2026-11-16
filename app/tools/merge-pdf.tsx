@@ -25,6 +25,7 @@ import {
 import {
   inspectPdfMetadata,
   mergePdfDocuments,
+  prepareLocalPdfUri,
   formatBytes,
   getFileSizeBytes,
 } from '@/utils';
@@ -74,18 +75,21 @@ export default function MergePdfScreen(): React.JSX.Element {
 
       for (const asset of result.assets) {
         try {
-          const meta = await inspectPdfMetadata(asset.uri);
+          // Normalize content:// or external URI to a local cached file:// URI
+          const localUri = await prepareLocalPdfUri(asset.uri, asset.name);
+          const meta = await inspectPdfMetadata(localUri);
+
           if (meta.isEncrypted) {
             encryptedFiles.push(asset.name || 'Protected PDF');
           } else if (meta.pageCount > 0) {
             let size = typeof asset.size === 'number' && asset.size > 0 ? asset.size : 0;
             if (size === 0) {
-              size = await getFileSizeBytes(asset.uri);
+              size = await getFileSizeBytes(localUri);
             }
 
             validItems.push({
               id: `${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-              uri: asset.uri,
+              uri: localUri,
               name: asset.name || 'document.pdf',
               sizeBytes: size,
               pageCount: meta.pageCount,
@@ -93,7 +97,8 @@ export default function MergePdfScreen(): React.JSX.Element {
           } else {
             corruptedFiles.push(asset.name || 'Invalid PDF');
           }
-        } catch {
+        } catch (err) {
+          console.warn('[MergePdfScreen] File inspection failed:', asset.name, err);
           corruptedFiles.push(asset.name || 'Unreadable PDF');
         }
       }

@@ -31,14 +31,91 @@ const A4_WIDTH = 595.28;
 const A4_HEIGHT = 841.89;
 
 /**
+ * Safely resolves an Android content:// URI or external URI into a local cached file:// URI
+ * so that native read operations and pdf-lib can access the bytes directly.
+ */
+export async function prepareLocalPdfUri(
+  sourceUri: string,
+  suggestedName?: string
+): Promise<string> {
+  // If already a local file:// that exists, return directly
+  if (sourceUri.startsWith('file://')) {
+    try {
+      const info = await FileSystem.getInfoAsync(sourceUri);
+      if (info.exists) {
+        return sourceUri;
+      }
+    } catch {}
+  }
+
+  // Copy content:// or inaccessible URI into app cache directory
+  const safeName = suggestedName
+    ? suggestedName.replace(/[^a-zA-Z0-9._-]/g, '_')
+    : `doc_${Date.now()}.pdf`;
+  const cleanName = safeName.toLowerCase().endsWith('.pdf') ? safeName : `${safeName}.pdf`;
+  const targetCacheUri = `${FileSystem.cacheDirectory}${Date.now()}_${cleanName}`;
+
+  await FileSystem.copyAsync({
+    from: sourceUri,
+    to: targetCacheUri,
+  });
+
+  return targetCacheUri;
+}
+
+/**
+ * Reads local or content file content as Base64, with copyAsync normalization
+ * and an XMLHttpRequest blob fallback.
+ */
+export async function readLocalFileAsBase64(uri: string): Promise<string> {
+  let readableUri = uri;
+
+  // 1. If it's a content:// URI, copy it to cache first
+  if (uri.startsWith('content://')) {
+    try {
+      readableUri = await prepareLocalPdfUri(uri);
+    } catch (copyErr) {
+      console.warn('[readLocalFileAsBase64] Failed to copy content URI to cache:', copyErr);
+    }
+  }
+
+  // 2. Try native FileSystem readAsStringAsync
+  try {
+    return await FileSystem.readAsStringAsync(readableUri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+  } catch (fsErr) {
+    console.warn('[readLocalFileAsBase64] readAsStringAsync failed, attempting XHR fallback:', fsErr);
+  }
+
+  // 3. Fallback: XMLHttpRequest blob -> FileReader base64
+  return new Promise<string>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', readableUri, true);
+    xhr.responseType = 'blob';
+    xhr.onload = () => {
+      const blob = xhr.response as Blob;
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = (reader.result as string) || '';
+        const base64 = result.includes(',') ? result.split(',')[1] : result;
+        resolve(base64);
+      };
+      reader.onerror = () => reject(new Error('FileReader failed to encode blob'));
+      reader.readAsDataURL(blob);
+    };
+    xhr.onerror = (e) => reject(new Error(`XHR failed to read file: ${JSON.stringify(e)}`));
+    xhr.send();
+  });
+}
+
+/**
  * Inspects a PDF file's metadata (page count and encryption status)
  * without modifying it. Gracefully catches password/encryption errors.
  */
 export async function inspectPdfMetadata(uri: string): Promise<PdfMetadata> {
   try {
-    const base64 = await FileSystem.readAsStringAsync(uri, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
+    const base64 = await readLocalFileAsBase64(uri);
 
     const doc = await PDFDocument.load(base64, { ignoreEncryption: false });
     return {
@@ -57,6 +134,7 @@ export async function inspectPdfMetadata(uri: string): Promise<PdfMetadata> {
         isEncrypted: true,
       };
     }
+    console.warn('[inspectPdfMetadata] Failed to parse PDF at uri:', uri, error);
     throw error;
   }
 }
@@ -80,9 +158,7 @@ export async function mergePdfDocuments(
 
   // 2. Loop through each PDF in exact order
   for (const uri of pdfUris) {
-    const base64 = await FileSystem.readAsStringAsync(uri, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
+    const base64 = await readLocalFileAsBase64(uri);
     const srcDoc = await PDFDocument.load(base64, { ignoreEncryption: false });
     const copiedPages = await mergedPdf.copyPages(srcDoc, srcDoc.getPageIndices());
     for (const page of copiedPages) {
